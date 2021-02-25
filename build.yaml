@@ -1,0 +1,6 @@
+---
+- name: Setup Virtual Resources
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - virt-setup

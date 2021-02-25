@@ -1,0 +1,9 @@
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+  register: upgrade
+
+- name: Debug upgrade results
+  debug:
+    var: upgrade

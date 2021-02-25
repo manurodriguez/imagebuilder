@@ -1,0 +1,28 @@
+networks:
+  - name: default
+    address: 192.168.122.1
+    netmask: 255.255.255.0
+    forward_mode: nat
+
+libvirt_images_path: /var/lib/libvirt/images
+
+server:
+  hostname: "imagebuilder"
+  disk_name: "imagebuilder.qcow2"
+  disk_size: 20G
+  root_partition: "/dev/sda3"
+  ram_kb: 4194304
+  vcpu: 2
+  rhel_image: rhel-8.2-x86_64-kvm.qcow2
+  rhel_image_root_password: !vault |
+    $ANSIBLE_VAULT;1.1;AES256
+    31353265303531396266363661323235643361366135353938633166656662373866623038383639
+    3530643332356366353965333535663464326562653834350a346461316363396337383332316564
+    62653062306333666166653365396239386261353230646633386234383537663630343239373132
+    6632366361313733390a336536383830353634343063326165613762633961383031376437326139
+    3561
+  domain_name: example.com
+  ssh_pubkey: /home/manuel/.ssh/id_rsa.pub
+  mgmt_ip: 192.168.122.6
+  bootmode: uefi
+

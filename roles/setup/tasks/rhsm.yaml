@@ -1,0 +1,23 @@
+- name: Register system to RHSM provider
+  redhat_subscription:
+    state: present
+    username: "{{ subscription.rhsm_username }}"
+    password: "{{ subscription.rhsm_password }}"
+    server_hostname: "{{ subscription.rhsm_server_hostname }}"
+    pool_ids: "{{ subscription.rhsm_pool_ids }}"
+
+- name: Disable repositories
+  rhsm_repository:
+    state: disabled
+    name: "{{ subscription.rhsm_repositories.disabled | default([]) }}"
+  when:
+    - "'disabled' in subscription.rhsm_repositories"
+    - "'*' not in (subscription.rhsm_repositories.disabled | default([], True))"
+
+- name: Enable repositories
+  rhsm_repository:
+    state: enabled
+    name: "{{ subscription.rhsm_repositories.enabled | default([]) }}"
+    purge: >-
+      {{ '*' in (subscription.rhsm_repositories.disabled | default([], True))  }}
+  when: "'enabled' in subscription.rhsm_repositories"

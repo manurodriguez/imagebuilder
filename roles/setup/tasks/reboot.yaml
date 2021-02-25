@@ -1,0 +1,15 @@
+- name: Reboot server
+  reboot:
+    reboot_timeout: 180
+  when:
+    - upgrade.changed 
+    #- "'kernel' in upgrade.results"
+
+- name: Wait 180 seconds for port 22 to become open
+  wait_for:
+    port: 22
+    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+    delay: 10
+    timeout: 180
+  connection: local
+

@@ -1,0 +1,33 @@
+name = "{{ blueprint.name }}"
+description = "{{ blueprint.description }}"
+version = "{{ blueprint.version }}"
+modules = []
+groups = []
+
+[[packages]]
+name = "httpd"
+version = "*"
+
+[[packages]]
+name = "openssh-server"
+version = "*"
+
+[[customizations.user]]
+name = "manny"
+description = "test user"
+password = "$6$6jDEq7Sczm40BbmM$3eRsjB3VAFJj8TErasvexPudLlUh3u4uNZqGpQ/UyfIqkhOC26IJfCi/kH3J45jaOLuNPsZVPMlY6DqX5EyxB1"
+key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC5a2O1NWLEzabggt+pBvNJL8zKRRFfsw3N4m8NvvuLIL1x6XjHb/z0mh14Fa0QL+guSiCUFvpllPD66zWR7cwkIC/qeX7lzZ3oZo0vbaEy+KwGwNQQKQUmTURQ48OHx/0bzgX8r8+VUPnJk8Jt9fgzNBHgerMGM4nhoGpp6wERs1lBJ89FXTHg2mc7sKsKIIVjggwCJyCaCYW0ovqyKHm8I5+DJyNg7awUZ+cxJBGi0cUZGwOI48J2iNml+1lU5Neyo4p24/IXieoRn378Lyl1zWjiVfXJ3Pkhmn+1WBMTPsIs6UtHqj2d/8G2LhOhqN2cqfvCPGHAAfiLRkHYl99ujK+ji5q9axjRr6z06ajVNKoq4JREgKMlLn41JGOQNsPDjwOh314ux40ssH9zhjtjJ9kPrRcLbUmpgBnOWVLCmGcPSxTrcD8p+zaRYCmEZ5Xly3Al3XKMD8NgAjdEMuot4cbk8vw/NdXiL4whT4PwM8+4JRHKlYJ62GyJK3sxh1U= manuel@laptop"
+home = "/home/manny/"
+shell = "/usr/bin/bash"
+groups = ["marketing", "wheel"]
+uid = 1050
+gid = 1050
+
+[customizations.timezone]
+timezone = "America/New_York"
+
+[customizations.firewall]
+ports = ["80:tcp"]
+
+[customizations.services]
+enabled = ["httpd"]

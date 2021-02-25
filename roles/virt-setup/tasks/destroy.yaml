@@ -1,0 +1,60 @@
+---
+- name: List all vms
+  virt:
+    command: list_vms
+  register: all_vms
+  tags:
+    - vm_provisioning
+
+- name: Destroy server vm
+  virt:
+    name: "{{ server.hostname }}"
+    state: destroyed
+  register: server_destroy
+  when: server.hostname in all_vms.list_vms
+  tags:
+    - vm_provisioning
+
+- name: Undefine server vm on bios mode
+  virt:
+    name: "{{ server.hostname }}"
+    command: undefine
+  changed_when: True
+  when:
+    - server_destroy.changed
+    - server.bootmode == 'bios'
+  tags:
+    - vm_provisioning
+
+- name: Undefine server vm on uefi mode
+  shell:
+    cmd: "virsh undefine --nvram {{ server.hostname }}"
+  changed_when: True
+  when:
+    - server_destroy.changed
+    - server.bootmode == 'uefi'
+  tags:
+    - vm_provisioning
+
+- name: Delete server disk
+  file:
+    path: "{{ libvirt_images_path }}/{{ server.disk_name }}"
+    state: absent
+  when: server_destroy.changed
+  tags:
+    - vm_provisioning
+
+- name: Remove network temporal files
+  block:
+    - name: Remove ifcfg-eth0
+      file:
+        path: /tmp/ifcfg-eth0
+        state: absent
+
+    - name: Remove authorized_keys
+      file:
+        path: /tmp/authorized_keys
+        state: absent
+  tags:
+    - vm_provisioning
+...

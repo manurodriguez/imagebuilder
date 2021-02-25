@@ -1,0 +1,7 @@
+---
+- name: Delete Virtual Resources
+  hosts: localhost
+  gather_facts: false
+  vars_files: roles/virt-setup/defaults/main.yaml
+  tasks: 
+    - import_tasks: roles/virt-setup/tasks/destroy.yaml

@@ -1,0 +1,59 @@
+- name: Prepare blueprint
+  template:
+    src: blueprint-default.toml.j2
+    dest: "{{ blueprints_store }}/blueprint-default.toml"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  tags:
+    - imagebuilder
+    - imageprepare
+
+- name: Push blueprint
+  shell:
+    cmd: "composer-cli blueprints push {{ blueprints_store }}/blueprint-default.toml"
+  tags:
+    - imagebuilder
+    - imagepush
+
+- name: Depsolve blueprint
+  shell:
+    cmd: "composer-cli blueprints depsolve {{ blueprint.name }}"
+  register: depsolve_results
+  tags:
+    - imagebuilder
+    - imagedevsolve
+
+- name: Print depsolve results
+  debug:
+    var: depsolve_results
+  tags:
+    - imagebuilder
+    - imagedevsolve
+
+- name: Start compose build
+  shell:
+    cmd: "composer-cli compose start {{ blueprint.name }} {{ blueprint.format }}" 
+  tags:
+    - imagebuilder
+    - imagecompose
+    - startstatus
+
+- name: Verify build status until is done
+  command: "composer-cli compose status | grep {{ blueprint.name }}"
+  register: cmd_res
+  retries: 10
+  delay: 30
+  until: "cmd_res.stdout_lines[0] | regex_search('FINISHED|FAILED')"
+  tags:
+    - imagebuilder
+    - imagestatus
+    - startstatus
+
+- name: Print image build final results
+  debug:
+    var: cmd_res
+  tags:
+    - imagebuilder
+    - imagestatus
+    - startstatus

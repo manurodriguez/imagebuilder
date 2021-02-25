@@ -1,0 +1,69 @@
+- name: Define config files for network interfaces on the server node
+  block:
+    - name: Define eth0
+      template:
+        src: server-eth0.j2
+        dest: /tmp/ifcfg-eth0
+
+    - name: Define ssh public key
+      copy:
+        content: "{{ lookup('file', server.ssh_pubkey) }}"
+        dest: /tmp/authorized_keys
+        mode: u=rw
+        owner: root
+        force: false
+  tags:
+    - vm_provisioning
+
+- name: Create server disk
+  shell: 
+    cmd: "qemu-img create -f qcow2 {{ libvirt_images_path }}/{{ server.disk_name }} {{ server.disk_size }}"
+    creates: "{{ libvirt_images_path }}/{{ server.disk_name }}"
+  register: create_server_disk
+  tags:
+    - vm_provisioning
+
+- name: Expand server disk
+  shell:
+    cmd: "virt-resize --expand {{ server.root_partition }} {{ libvirt_images_path }}/{{ server.rhel_image }} {{ libvirt_images_path }}/{{ server.disk_name }}"
+  when: create_server_disk.changed
+  tags:
+    - vm_provisioning
+
+- name: Customize server vm
+  shell:
+    cmd: | 
+         virt-customize -a {{ libvirt_images_path }}/{{ server.disk_name }} \
+         --hostname {{ server.hostname }}.{{ server.domain_name }} \
+         --root-password password:{{ server.rhel_image_root_password }} \
+         --uninstall cloud-init \
+         --copy-in /tmp/ifcfg-eth0:/etc/sysconfig/network-scripts/ \
+         --mkdir /root/.ssh \
+         --copy-in /tmp/authorized_keys:/root/.ssh/ \
+         --selinux-relabel
+  when: create_server_disk.changed
+  tags:
+    - vm_provisioning
+
+- name: Define server vm with bios mode
+  virt:
+    command: define
+    xml: "{{ lookup('template', 'server-bios.xml.j2') }}"
+  when: server.bootmode == 'bios'
+  tags:
+    - vm_provisioning
+
+- name: Define server vm with uefi mode
+  virt:
+    command: define
+    xml: "{{ lookup('template', 'server-uefi.xml.j2') }}"
+  when: server.bootmode == 'uefi'
+  tags:
+    - vm_provisioning
+
+- name: Start server vm
+  virt:
+    name: "{{ server.hostname }}"
+    state: running
+  tags:
+    - vm_provisioning

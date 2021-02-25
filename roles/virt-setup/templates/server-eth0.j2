@@ -1,0 +1,9 @@
+DEVICE="eth0"
+BOOTPROTO="none"
+ONBOOT="yes"
+TYPE="Ethernet"
+IPADDR="{{ server.mgmt_ip }}"
+NETMASK="{{ networks[0].netmask }}"
+GATEWAY="{{ networks[0].address }}"
+DNS1=8.8.4.4
+DNS2=8.8.8.8

@@ -1,0 +1,24 @@
+- name: Install Image Builder
+  yum:
+    name: "{{ imagebuilder_packages }}"
+    state: present
+  tags:
+    - install
+
+- name: Start Image Builder
+  service:
+    name: "{{ imagebuilder_service }}"
+    state: started
+    enabled: yes
+  tags:
+    - install
+
+- name: Prepare blueprint store dir
+  file:
+    path: "{{ blueprints_store }}"
+    owner: root
+    group: root
+    mode: "u=rwx,g=rwx,o=rx"
+    state: directory
+  tags:
+    - install

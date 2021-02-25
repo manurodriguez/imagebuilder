@@ -1,0 +1,5 @@
+---
+- name: Setup VM 
+  hosts: imagebuilder
+  roles:
+    - setup
